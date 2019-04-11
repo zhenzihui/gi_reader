@@ -9,8 +9,7 @@ class Utils {
   static Dio _dio = new Dio();
 
   static Future<Map<String, dynamic>> getFoodJson() async {
-    final String url = await getConf().then((c) => c.url);
-    print("url: $url, json:${json.toString()}");
+    final String url = await getConf().then((c) => c.url + c.giData);
     return _dio.get(url).then((json) => jsonDecode(json.toString()));
   }
 
