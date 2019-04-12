@@ -1,4 +1,6 @@
 {
   "url": "http://ppdl5c24d.bkt.clouddn.com",
-  "gi_data": "/gidata.json"
+  "gi_data": "/gidata.json",
+  "localData": "gidata.json",
+  "imageUrl": "http://gank.io/api/random/data/%E7%A6%8F%E5%88%A9"
 }

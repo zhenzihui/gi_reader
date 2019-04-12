@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gi_reader/model/Food.dart';
 import 'package:gi_reader/tool/Utils.dart';
-
+import 'package:gi_reader/ItemDetail.dart';
 class FoodList extends StatefulWidget {
   @override
   State createState() {
@@ -10,7 +10,7 @@ class FoodList extends StatefulWidget {
 }
 
 class FoodListState extends State<FoodList> {
-  int _categoryId = 0;
+  int _categoryId = 1;
   int _currentIndex = 0;
 
   FoodListState();
@@ -22,12 +22,24 @@ class FoodListState extends State<FoodList> {
   }
 
   Widget _listItem(Item item) {
-    return ListTile(title: Text(item.name), subtitle: Text("gi: ${item.gi}"));
+    return ListTile(
+        title: Text(item.name),
+        subtitle: Text("gi: ${item.gi}"),
+        onTap: () => onTapItem(item),
+    );
+  }
+
+  void onTapItem(Item item) {
+    Navigator.push(context, new MaterialPageRoute(builder: (context) => ItemDetail(item)));
   }
 
   Widget _foodList(BuildContext context, AsyncSnapshot snapshot) {
     List<Category> categories = snapshot.data;
-    var _items = categories.where((category) => category.id == _categoryId).expand((c) => c.items.map((item) => item)).toList();
+    print("categoryId: $_categoryId");
+    var _items = categories
+        .where((category) => category.id == _categoryId)
+        .expand((c) => c.items.map((item) => item))
+        .toList();
     return new ListView.builder(
         padding: EdgeInsets.all(10),
         itemCount: _items.length,
@@ -44,7 +56,7 @@ class FoodListState extends State<FoodList> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return AlertDialog(content:Text("加载中。。。"));
+            return AlertDialog(content: Text("加载中。。。"));
           default:
             print(snapshot.error);
             if (snapshot.hasError)
@@ -66,8 +78,7 @@ class FoodListState extends State<FoodList> {
       print(list.toString());
     });
   }
-  
-  
+
   // 底部
 
   Widget _buildNavigationBar() {
@@ -95,15 +106,10 @@ class FoodListState extends State<FoodList> {
       _categoryId = index + 1;
       _currentIndex = index;
     });
-
-
-
   }
 
   Widget _bottomNavigationBar(BuildContext _context,
       AsyncSnapshot<List<BottomNavigationBarItem>> snapshot) {
-
-
     return BottomNavigationBar(
       items: snapshot.data,
       type: BottomNavigationBarType.fixed,
@@ -113,24 +119,26 @@ class FoodListState extends State<FoodList> {
     );
   }
 
-
-
   Future<List<BottomNavigationBarItem>> _bottomNavigationItems() async {
     List<Category> categories = await FoodListState()._getData();
     return categories.map((category) {
       return BottomNavigationBarItem(
           icon: Icon(Icons.local_dining),
-          activeIcon: Icon(Icons.local_dining, color: Colors.red),
+          activeIcon: Icon(Icons.check_circle, color: Colors.cyan),
           title: Text(category.name));
     }).toList();
   }
 
-  int _getCategoryId() => _currentIndex + 1;
+  void onRefresh() {}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _foodDataBuilder(),
+      body: Container(
+        child: RefreshIndicator(
+            child: _foodDataBuilder(),
+            onRefresh: () => Future.sync(() => setState(() => {}))),
+      ),
       bottomNavigationBar: _buildNavigationBar(),
     );
   }
