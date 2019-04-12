@@ -44,9 +44,10 @@ class Foods {
 
 class Category {
   String name;
+  int id;
   List<Item> items;
 
-  Category({this.name, this.items});
+  Category({this.name, this.items, this.id});
 
   Category.fromJson(Map<String, dynamic> json) {
     name = json['name'];
@@ -55,6 +56,7 @@ class Category {
       json['items'].forEach((v) {
         items.add(new Item.fromJson(v));
       });
+      id = json['id'];
     }
   }
 
@@ -64,6 +66,7 @@ class Category {
     if (this.items != null) {
       data['items'] = this.items.map((v) => v.toJson()).toList();
     }
+    data['id'] = this.id;
     return data;
   }
 }
@@ -71,18 +74,21 @@ class Category {
 class Item {
   String name;
   int gi;
+  int id;
 
-  Item({this.name, this.gi});
+  Item({this.name, this.gi, this.id});
 
   Item.fromJson(Map<String, dynamic> json) {
     name = json['name'];
     gi = json['gi'];
+    id = json['id'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['name'] = this.name;
     data['gi'] = this.gi;
+    data['id'] = this.id;
     return data;
   }
 }

@@ -10,6 +10,11 @@ class FoodList extends StatefulWidget {
 }
 
 class FoodListState extends State<FoodList> {
+  int _categoryId = 0;
+  int _currentIndex = 0;
+
+  FoodListState();
+
   Future<List<Category>> _getData() {
     final q = Utils.getFoodJson();
     return q.then(
@@ -22,13 +27,12 @@ class FoodListState extends State<FoodList> {
 
   Widget _foodList(BuildContext context, AsyncSnapshot snapshot) {
     List<Category> categories = snapshot.data;
-    var _items = categories.expand((c) => c.items.map((item) => item)).toList();
+    var _items = categories.where((category) => category.id == _categoryId).expand((c) => c.items.map((item) => item)).toList();
     return new ListView.builder(
         padding: EdgeInsets.all(10),
         itemCount: _items.length,
         itemBuilder: (BuildContext _context, int i) {
           print("itemBuilderIndex: $i");
-          if (i.isOdd) return new Divider();
           return _listItem(_items[i]);
         });
   }
@@ -40,7 +44,7 @@ class FoodListState extends State<FoodList> {
         switch (snapshot.connectionState) {
           case ConnectionState.none:
           case ConnectionState.waiting:
-            return Text("加载中。。。");
+            return AlertDialog(content:Text("加载中。。。"));
           default:
             print(snapshot.error);
             if (snapshot.hasError)
@@ -62,11 +66,72 @@ class FoodListState extends State<FoodList> {
       print(list.toString());
     });
   }
+  
+  
+  // 底部
+
+  Widget _buildNavigationBar() {
+    return FutureBuilder(
+      future: _bottomNavigationItems(),
+      builder: (BuildContext _context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Text("没有数据");
+          case ConnectionState.waiting:
+            return Text("加载中。。。");
+          default:
+            if (snapshot.hasError) {
+              return Text("Errors: ${snapshot.error.toString()}");
+            } else {
+              return _bottomNavigationBar(_context, snapshot);
+            }
+        }
+      },
+    );
+  }
+
+  void _onTapItems(int index) {
+    setState(() {
+      _categoryId = index + 1;
+      _currentIndex = index;
+    });
+
+
+
+  }
+
+  Widget _bottomNavigationBar(BuildContext _context,
+      AsyncSnapshot<List<BottomNavigationBarItem>> snapshot) {
+
+
+    return BottomNavigationBar(
+      items: snapshot.data,
+      type: BottomNavigationBarType.fixed,
+      currentIndex: _currentIndex,
+      onTap: (int index) => _onTapItems(index),
+      fixedColor: Colors.cyanAccent,
+    );
+  }
+
+
+
+  Future<List<BottomNavigationBarItem>> _bottomNavigationItems() async {
+    List<Category> categories = await FoodListState()._getData();
+    return categories.map((category) {
+      return BottomNavigationBarItem(
+          icon: Icon(Icons.local_dining),
+          activeIcon: Icon(Icons.local_dining, color: Colors.red),
+          title: Text(category.name));
+    }).toList();
+  }
+
+  int _getCategoryId() => _currentIndex + 1;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _foodDataBuilder(),
+      bottomNavigationBar: _buildNavigationBar(),
     );
   }
 }

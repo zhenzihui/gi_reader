@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'FoodList.dart';
+import 'model/Food.dart';
+
 void main() => runApp(GiReaderApp());
 
 class GiReaderApp extends StatelessWidget {
@@ -26,8 +28,19 @@ class GIListPage extends StatefulWidget {
 
 class _GIListPageState extends State<GIListPage> {
 
+  List<Widget> _appActions() {
+    return [Icon(Icons.search, semanticLabel: "search")];
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return FoodList();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("GI查询"),
+        actions: _appActions(),
+      ),
+      body: FoodList(),
+    );
   }
 }
